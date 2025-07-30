@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Documentos SAVB</title>
+    <link type="text/css" href="style.css" rel="stylesheet">
+    <!-- Carga de Tailwind CSS CDN para estilos rápidos y responsivos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body class="bg-gray-100 text-gray-800 flex flex-col min-h-screen">
+    <!-- Encabezado de la página -->
+    <header class="bg-blue-700 text-white p-6 shadow-lg rounded-b-lg">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl font-bold mb-2">UNIDAD EDUCATIVA SANTA ANA VILLA BOLIVIA</h1>
+            <p class="text-lg">Selecciona un documento de la lista para visualizarlo.</p>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="container mx-auto p-6 flex-grow flex flex-col md:flex-row gap-6">
+        <!-- Sección de la lista de documentos -->
+        <aside class="w-full md:w-1/4 bg-white p-6 rounded-lg shadow-xl">
+            <h2 class="text-2xl font-semibold text-blue-600 mb-4">Documentos Disponibles</h2>
+            <ul id="document-list" class="space-y-2">
+                <!-- Los elementos de la lista se cargarán aquí mediante JavaScript -->
+            </ul>
+        </aside>
+
+        <!-- Sección del visor de documentos -->
+        <section class="w-full md:w-3/4 bg-white p-8 rounded-lg shadow-xl">
+            <h2 id="current-document-title" class="text-3xl font-semibold text-blue-600 mb-6 text-center">
+                Selecciona un documento para empezar
+            </h2>
+            
+            <!-- Contenedor responsivo para el iframe del documento -->
+            <div class="document-container">
+                <iframe 
+                    id="document-viewer-iframe"
+                    src="" 
+                    type="application/pdf" 
+                    title="Visor de Documento"
+                    loading="lazy"
+                    allowfullscreen
+                    class="rounded-md">
+                    <!-- Contenido de respaldo si el navegador no soporta la visualización directa -->
+                    <p class="p-4 text-center text-red-500">
+                        Tu navegador no soporta la visualización directa de este tipo de documento. 
+                        Por favor, <span id="download-document-fallback"></span>.
+                    </p>
+                </iframe>
+            </div>
+
+            <p class="mt-8 text-center text-gray-600">
+                Haz clic en el nombre de un documento en la lista de la izquierda para cargarlo en el visor.
+                <br>
+                Nota: Para visualizar archivos .docx directamente en el navegador, estos deben estar alojados en una URL pública y se utiliza un servicio como Google Docs Viewer.
+            </p>
+        </section>
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="bg-gray-800 text-white p-6 mt-8 shadow-inner rounded-t-lg">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 Visor de Documentos. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Array de objetos que representan los documentos disponibles
+        // Asegúrate de que las rutas 'path' sean correctas y los archivos existan.
+        // Para archivos .docx, es CRUCIAL que estén alojados en una URL pública
+        // y que se use un servicio de visualización como Google Docs Viewer.
+        // Formato para Google Docs Viewer: https://docs.google.com/gview?url=TU_URL_PUBLICA_DEL_DOCX&embedded=true
+        const documents = [
+            { name: "R.M. 001/2025 (PDF)", path: "web/RM 0001_2025.pdf", type: "pdf" },
+            { name: "POA 2025 (PDF)", path: "web/POA 2025- SAVB .pdf", type: "pdf" },
+            { name: "PSP 2025 (PDF)", path: "web/PSP 2025 SAVB.pdf", type: "pdf" },
+            { name: "PLAN ANUAL TRIMESTRALIZADO 2025 (PDF)", path: "web/PLAN ANUAL TRIMESTRALIZADO 2025.pdf", type: "pdf" },
+            { name: "LISTA DE PROFESORES 2025 (PDF)", path: "web/LISTA DE PROFESORES  2025.pdf", type: "pdf" },
+            { name: "COMISIONES 2025 (PDF)", path: "web/COMISIONES 2025.pdf", type: "pdf" },
+            { name: "TUTORIAS 2025 (PDF)", path: "web/TUTORIAS 2025.pdf", type: "pdf" },
+            { name: "FECHAS CIVICAS 2025 (PDF)", path: "web/FECHAS CIVICAS 2025.pdf", type: "pdf" },
+            { name: "INFORME Y COMPROMISOS PEDAGOGICOS 2025 (PDF)", path: "web/INFORMES Y COMPROMISOS PEDAGOGICOS POR TUTORIA Y MATERIA.pdf", type: "pdf" },
+            { name: "FILIACION ESTUDIANTES 2025 (PDF)", path: "web/FILIACION ESTUDIANTES 2025.pdf", type: "pdf" },
+            { name: "HORARIO PROFESORES 2025 (PDF)", path: "web/HORARIO PROFESORES.pdf", type: "pdf" },
+            { name: "HORARIO CURSOS 2025 (PDF)", path: "web/HORARIO CURSOS.pdf", type: "pdf" },
+            { name: "PLANES Y PROGRAMAS SECUNDARIA (PDF)", path: "web/Planes y programas - Nivel Secundaria [2023] (1).pdf", type: "pdf" },
+            // Para DOCX, usa Google Docs Viewer con la URL pública de tu archivo
+            // Ejemplo de un DOCX en Google Drive (debe ser público):
+            { name: "PDC 2025 (DOCX)", path: "https://docs.google.com/document/d/11_3JqsMVFRcT5TFZ6KbEF0v2CGSctU4cBS_EdN4y5ns/edit?tab=t.0", type: "docx" },
+            // Ejemplo con una URL de marcador de posición para tu DOCX:
+            { name: "Especificaciones Técnicas (DOCX)", path: "https://docs.google.com/gview?url=https://ejemplo.com/documentos/especificaciones_tecnicas.docx&embedded=true", type: "docx" }
+        ];
+
+        const documentList = document.getElementById('document-list');
+        const documentViewerIframe = document.getElementById('document-viewer-iframe');
+        const currentDocumentTitle = document.getElementById('current-document-title');
+        const downloadDocumentFallback = document.getElementById('download-document-fallback');
+
+        // Función para cargar un documento en el visor
+        function loadDocument(docName, docPath, docType) {
+            documentViewerIframe.src = docPath; // Actualiza la fuente del iframe
+            currentDocumentTitle.textContent = `Documento: ${docName}`; // Actualiza el título
+            
+            // Actualiza el enlace de descarga de respaldo según el tipo de documento
+            let fallbackText = '';
+            // Si es un DOCX y estamos usando Google Docs Viewer, el enlace de descarga debe ser el DOCX original
+            if (docType === 'docx' && docPath.includes('docs.google.com/gview')) {
+                // Intentar extraer la URL original del DOCX si está en el formato gview
+                const urlParam = new URLSearchParams(docPath.split('?')[1]).get('url');
+                if (urlParam) {
+                    fallbackText = `<a href="${urlParam}" class="text-blue-500 hover:underline font-medium" download>descarga el archivo DOCX aquí</a>`;
+                } else {
+                    fallbackText = `<a href="${docPath}" class="text-blue-500 hover:underline font-medium" download>descarga el archivo DOCX aquí</a>`;
+                }
+            } else {
+                // Para PDFs o DOCX locales que no usan gview (que se descargarán)
+                fallbackText = `<a href="${docPath}" class="text-blue-500 hover:underline font-medium" download>descarga el archivo ${docType.toUpperCase()} aquí</a>`;
+            }
+            downloadDocumentFallback.innerHTML = fallbackText;
+
+            // Elimina la clase 'active' de todos los elementos y la añade al seleccionado
+            const listItems = documentList.querySelectorAll('li');
+            listItems.forEach(item => item.classList.remove('active'));
+            const selectedItem = documentList.querySelector(`li[data-path="${docPath}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+        }
+
+        // Carga la lista de documentos al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            documents.forEach(doc => {
+                const listItem = document.createElement('li');
+                listItem.className = 'document-list-item p-3 rounded-md border border-gray-200 text-blue-700 hover:text-blue-900';
+                listItem.textContent = doc.name;
+                listItem.dataset.path = doc.path; // Guarda la ruta en un atributo de datos
+                listItem.dataset.name = doc.name; // Guarda el nombre en un atributo de datos
+                listItem.dataset.type = doc.type; // Guarda el tipo en un atributo de datos
+
+                // Añade un evento click a cada elemento de la lista
+                listItem.addEventListener('click', () => {
+                    loadDocument(doc.name, doc.path, doc.type);
+                });
+                documentList.appendChild(listItem);
+            });
+
+            // Opcional: Cargar el primer documento automáticamente al inicio
+            if (documents.length > 0) {
+                loadDocument(documents[0].name, documents[0].path, documents[0].type);
+            }
+        });
+    </script>
+
+</body>
+</html>

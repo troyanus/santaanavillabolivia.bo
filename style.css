@@ -1,0 +1,34 @@
+        /* Fuente Inter para una apariencia moderna */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilos personalizados para el contenedor del documento */
+        .document-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 75%; /* Proporción 4:3 para el iframe, ajusta según necesites */
+            height: 0;
+            overflow: hidden;
+            border-radius: 0.5rem; /* Bordes redondeados */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra para el visor */
+        }
+        .document-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none; /* Eliminar el borde predeterminado del iframe */
+        }
+        /* Estilo para los elementos de la lista de documentos */
+        .document-list-item {
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .document-list-item:hover {
+            background-color: #f8ff91; /* bg-gray-200 */
+        }
+        .document-list-item.active {
+            background-color: #bfdbfe; /* bg-blue-200 */
+            font-weight: bold;
+        }
